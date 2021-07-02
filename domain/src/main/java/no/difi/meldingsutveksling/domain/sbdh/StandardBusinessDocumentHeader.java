@@ -35,9 +35,9 @@ import java.util.Set;
 
 /**
  * Java class for StandardBusinessDocumentHeader complex type.
- * 
+ *
  * The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>{@code
  * <complexType name="StandardBusinessDocumentHeader">
  *   <complexContent>
@@ -156,6 +156,12 @@ public class StandardBusinessDocumentHeader {
             throw new MeldingsUtvekslingRuntimeException();
         }
         return identifier.getValue();
+    }
+
+    @JsonIgnore
+    public Optional<String> getType() {
+        return Optional.ofNullable(documentIdentification)
+                .flatMap(p -> Optional.ofNullable(p.getType()));
     }
 
     public static class Builder {

@@ -2,6 +2,7 @@ package no.difi.meldingsutveksling.nextmove.v2;
 
 import lombok.RequiredArgsConstructor;
 import no.difi.meldingsutveksling.domain.sbdh.StandardBusinessDocument;
+import no.difi.meldingsutveksling.exceptions.MissingMessageTypeException;
 import no.difi.meldingsutveksling.exceptions.ReceiverDoesNotAcceptProcessException;
 import no.difi.meldingsutveksling.nextmove.BusinessMessage;
 import no.difi.meldingsutveksling.serviceregistry.SRParameter;
@@ -17,10 +18,15 @@ public class ServiceRecordProvider {
     private final ServiceRegistryLookup serviceRegistryLookup;
 
     ServiceRecord getServiceRecord(StandardBusinessDocument sbd) {
-        BusinessMessage<?> businessMessage = sbd.getBusinessMessage();
+        return sbd.getBusinessMessage(BusinessMessage.class)
+                .map(p -> getServiceRecord(sbd, p))
+                .orElseThrow(MissingMessageTypeException::new);
+    }
+
+    private ServiceRecord getServiceRecord(StandardBusinessDocument sbd, BusinessMessage<?> businessMessage) {
         try {
             SRParameter.SRParameterBuilder parameterBuilder = SRParameter.builder(sbd.getReceiverIdentifier())
-                .process(sbd.getProcess());
+                    .process(sbd.getProcess());
 
             sbd.getOptionalConversationId().ifPresent(parameterBuilder::conversationId);
 

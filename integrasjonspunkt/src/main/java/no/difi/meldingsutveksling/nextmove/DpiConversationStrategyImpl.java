@@ -49,13 +49,12 @@ public class DpiConversationStrategyImpl implements DpiConversationStrategy {
             throw new MeldingsUtvekslingRuntimeException(e);
         }
 
-        if (message.getSbd().getBusinessMessage() instanceof DpiDigitalMessage) {
-            DpiDigitalMessage bmsg = (DpiDigitalMessage) message.getSbd().getBusinessMessage();
-            conversationService.findConversation(message.getMessageId()).ifPresent(c -> {
-                c.setMessageTitle(bmsg.getTittel());
-                conversationService.save(c);
-            });
-        }
+        message.getSbd().getBusinessMessage(DpiDigitalMessage.class).ifPresent(bmsg ->
+                conversationService.findConversation(message.getMessageId()).ifPresent(c -> {
+                    c.setMessageTitle(bmsg.getTittel());
+                    conversationService.save(c);
+                })
+        );
 
         NextMoveDpiRequest request = new NextMoveDpiRequest(props, clock, message, serviceRecord, optionalCryptoMessagePersister);
 

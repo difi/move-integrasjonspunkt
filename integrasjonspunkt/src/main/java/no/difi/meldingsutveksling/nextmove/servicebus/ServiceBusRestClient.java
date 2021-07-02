@@ -76,7 +76,7 @@ public class ServiceBusRestClient {
 
         ResponseEntity<String> response = restTemplate.exchange(uri, HttpMethod.POST, httpEntity, String.class);
         if (!response.getStatusCode().is2xxSuccessful()) {
-            log.error("{} got response {}, error sending message to service bus", resourceUri, response.getStatusCode().toString());
+            log.error("{} got response {}, error sending message to service bus", resourceUri, response.getStatusCode());
         }
     }
 
@@ -95,7 +95,7 @@ public class ServiceBusRestClient {
         try {
             ResponseEntity<String> response = restTemplate.exchange(uri, HttpMethod.POST, httpEntity, String.class);
             if (!asList(HttpStatus.OK, HttpStatus.CREATED).contains(response.getStatusCode())) {
-                log.debug("{} got response {}, returning empty", resourceUri, response.getStatusCode().toString());
+                log.debug("{} got response {}, returning empty", resourceUri, response.getStatusCode());
                 return Optional.empty();
             }
 
@@ -143,7 +143,7 @@ public class ServiceBusRestClient {
         ResponseEntity<String> response = restTemplate.exchange(uri, HttpMethod.DELETE, httpEntity, String.class);
         if (!response.getStatusCode().is2xxSuccessful()) {
             log.error("{} got response {}, message [messageId={}] was not deleted",
-                    resourceUri, response.getStatusCode().toString(),
+                    resourceUri, response.getStatusCode(),
                     message.getPayload().getSbd().getDocumentId());
         }
     }

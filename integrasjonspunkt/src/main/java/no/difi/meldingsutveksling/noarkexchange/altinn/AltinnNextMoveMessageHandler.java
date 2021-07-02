@@ -55,7 +55,7 @@ public class AltinnNextMoveMessageHandler implements AltinnMessageHandler {
                 return;
             }
             if (altinnPackage.getAsicInputStream() != null) {
-                try (InputStream asicStream = altinnPackage.getAsicInputStream()){
+                try (InputStream asicStream = altinnPackage.getAsicInputStream()) {
                     messagePersister.writeStream(sbd.getDocumentId(), ASIC_FILE, asicStream, -1L);
                 } catch (IOException e) {
                     throw new NextMoveRuntimeException("Error persisting ASiC", e);
@@ -74,9 +74,10 @@ public class AltinnNextMoveMessageHandler implements AltinnMessageHandler {
             }
         }
 
-        if (sbdUtil.isReceipt(sbd) && sbd.getBusinessMessage() instanceof ArkivmeldingKvitteringMessage) {
-            ArkivmeldingKvitteringMessage receipt = (ArkivmeldingKvitteringMessage) sbd.getBusinessMessage();
-            conversationService.registerStatus(receipt.getRelatedToMessageId(), ReceiptStatus.LEST);
+        if (sbdUtil.isReceipt(sbd)) {
+            sbd.getBusinessMessage(ArkivmeldingKvitteringMessage.class).ifPresent(receipt ->
+                    conversationService.registerStatus(receipt.getRelatedToMessageId(), ReceiptStatus.LEST)
+            );
         }
     }
 

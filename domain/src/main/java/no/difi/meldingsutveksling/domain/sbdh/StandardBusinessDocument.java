@@ -8,22 +8,13 @@
 
 package no.difi.meldingsutveksling.domain.sbdh;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.Data;
 import net.logstash.logback.marker.LogstashMarker;
 import no.difi.meldingsutveksling.domain.MeldingsUtvekslingRuntimeException;
 import no.difi.meldingsutveksling.domain.MessageInfo;
 import no.difi.meldingsutveksling.domain.Organisasjonsnummer;
-import no.difi.meldingsutveksling.nextmove.*;
-import no.difi.meldingsutveksling.validation.InstanceOf;
-import no.difi.meldingsutveksling.validation.group.ValidationGroups;
-import no.difi.meldingsutveksling.validation.group.sequenceprovider.StandardBusinessDocumentGroupSequenceProvider;
-import org.hibernate.validator.group.GroupSequenceProvider;
+import no.difi.meldingsutveksling.nextmove.NextMoveRuntimeException;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -35,7 +26,7 @@ import java.util.Set;
 
 /**
  * Java class for StandardBusinessDocument complex type.
- *
+ * <p>
  * The following schema fragment specifies the expected content contained within this class.
  *
  * <pre>{@code
@@ -56,11 +47,7 @@ import java.util.Set;
         "standardBusinessDocumentHeader",
         "any"
 })
-@Getter
-@Setter
-@ToString
-@JsonSerialize(using = NextMoveMessageSerializer.class)
-@GroupSequenceProvider(StandardBusinessDocumentGroupSequenceProvider.class)
+@Data
 public class StandardBusinessDocument {
 
     @XmlElement(name = "StandardBusinessDocumentHeader")
@@ -69,22 +56,12 @@ public class StandardBusinessDocument {
     private StandardBusinessDocumentHeader standardBusinessDocumentHeader;
 
     @XmlAnyElement(lax = true)
-    @JsonDeserialize(using = NextMoveMessageDeserializer.class)
-    @JsonAlias({"fiksio", "arkivmelding", "arkivmelding_kvittering", "avtalt", "digital", "digital_dpv", "print", "innsynskrav", "publisering", "einnsyn_kvittering", "status"})
     @NotNull
-    @InstanceOf(value = FiksIoMessage.class, groups = ValidationGroups.MessageType.FiksIo.class)
-    @InstanceOf(value = ArkivmeldingMessage.class, groups = ValidationGroups.MessageType.Arkivmelding.class)
-    @InstanceOf(value = AvtaltMessage.class, groups = ValidationGroups.MessageType.Avtalt.class)
-    @InstanceOf(value = DpiDigitalMessage.class, groups = ValidationGroups.MessageType.Digital.class)
-    @InstanceOf(value = DigitalDpvMessage.class, groups = ValidationGroups.MessageType.DigitalDpv.class)
-    @InstanceOf(value = DpiPrintMessage.class, groups = ValidationGroups.MessageType.Print.class)
-    @InstanceOf(value = InnsynskravMessage.class, groups = ValidationGroups.MessageType.Innsynskrav.class)
-    @InstanceOf(value = PubliseringMessage.class, groups = ValidationGroups.MessageType.Publisering.class)
     private Object any;
 
     @JsonIgnore
-    public BusinessMessage getBusinessMessage() {
-        return (BusinessMessage) getAny();
+    public <T> Optional<T> getBusinessMessage(Class<T> clazz) {
+        return clazz.isInstance(any) ? Optional.of(clazz.cast(any)) : Optional.empty();
     }
 
     @JsonIgnore
@@ -210,5 +187,11 @@ public class StandardBusinessDocument {
                 .getScopeInformation()
                 .stream().findFirst()
                 .map(CorrelationInformation::getExpectedResponseDateTime);
+    }
+
+    @JsonIgnore
+    public Optional<String> getType() {
+        return Optional.of(standardBusinessDocumentHeader)
+                .flatMap(StandardBusinessDocumentHeader::getType);
     }
 }

@@ -9,8 +9,8 @@ import lombok.Value;
 @Builder
 public class ServiceBusMessage {
 
-    private final ServiceBusPayload payload;
-    private final String lockToken;
-    private final String messageId;
-    private final String sequenceNumber;
+    ServiceBusPayload payload;
+    String lockToken;
+    String messageId;
+    String sequenceNumber;
 }
